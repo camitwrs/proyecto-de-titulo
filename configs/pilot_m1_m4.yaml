@@ -1,0 +1,292 @@
+# Aquí se define la configuración piloto para M1 (transfer learning con EfficientNetB4) y M4
+# (CNN entrenada desde cero) sobre ISIC 2019. Es solo una especificación de diseño: todavía
+# no se descargan datos ni se ejecutan entrenamientos.
+status: proposed
+seed: 42
+framework: tensorflow
+
+dataset:
+  name: ISIC_2019
+  split: training
+  status: pending_execution
+  classes:
+    order: [AK, BCC, BKL, DF, MEL, NV, SCC, VASC]
+    num_classes: 8
+  input_shape: [380, 380, 3]
+  expected_image_count: 25331
+  expected_image_count_status: pending_verification
+  partition:
+    specification_status: proposed
+    materialization_status: pending_execution
+    materialized: false
+    train: 0.70
+    validation: 0.15
+    test: 0.15
+    stratified_by: class
+    seed: 42
+  ood_policy:
+    reassign_unknown_to_known_classes: false
+
+preprocessing:
+  color_mode: rgb
+  resize:
+    height: 380
+    width: 380
+    interpolation: bilinear
+  m1:
+    dtype: float32
+    expected_input_range: [0, 255]
+    external_normalization: none
+    preprocess_input:
+      location: EfficientNetB4_internal
+      apply_separately: false
+    warning: "Do not divide by 255 or apply an additional external EfficientNet preprocess_input."
+  m4:
+    dtype: float32
+    range: [0, 1]
+    normalization: divide_by_255
+  augmentation:
+    specification_status: proposed
+    execution_status: pending_execution
+    applies_to: train_only
+    order:
+      - horizontal_flip
+      - rotation
+      - isotropic_zoom
+      - contrast
+    operations:
+      horizontal_flip:
+        probability: 0.5
+      rotation:
+        probability: 0.5
+        degrees: [-30, 30]
+        interpolation: bilinear
+        fill_mode: reflect
+      isotropic_zoom:
+        probability: 0.5
+        factor: [-0.10, 0.10]
+        interpolation: bilinear
+        fill_mode: reflect
+      contrast:
+        probability: 0.5
+        factor: [0.90, 1.10]
+        adjustment: per_channel_mean
+    clip_range_after_augmentation: [0, 255]
+
+common:
+  batch_size: 8
+  loss:
+    name: categorical_crossentropy
+    label_smoothing: 0.05
+  optimizer_defaults:
+    beta_1: 0.9
+    beta_2: 0.999
+    epsilon: 0.0000001
+  callbacks:
+    early_stopping:
+      monitor: val_loss
+      mode: min
+      patience: 7
+      min_delta: 0.0001
+      restore_best_weights: true
+    reduce_lr_on_plateau:
+      monitor: val_loss
+      mode: min
+      factor: 0.2
+      patience: 3
+      min_lr: 0.0000001
+      min_delta: 0.0001
+      cooldown: 0
+  class_weights:
+    status: pending_execution
+    formula: "w_c = N / (K * n_c)"
+    computed_from: train_only
+
+checkpoint_selection:
+  status: proposed
+  selection_set: validation
+  monitor: val_loss
+  mode: min
+  criterion: strict_minimum
+  exact_tie_policy: first_epoch_in_global_order
+  evaluate_from: persisted_checkpoint_file
+  test_set_used_for_selection: false
+  m1:
+    save_best_checkpoint_per_phase: true
+    final_selection: minimum_val_loss_across_phase_1_and_phase_2
+  m4:
+    save_best_checkpoint: true
+
+reproducibility:
+  partition_seed: 42
+  training_seeds:
+    specification_status: proposed
+    values: [42, 123, 456, 789, 2026]
+  controls:
+    python_random: true
+    numpy: true
+    tensorflow: true
+  gpu_determinism:
+    status: best_effort
+    residual_nondeterminism_possible: true
+
+m1:
+  name: EfficientNetB4
+  include_top: false
+  weights: imagenet
+  input_shape: [380, 380, 3]
+  num_classes: 8
+  head:
+    - layer: GlobalAveragePooling2D
+    - layer: BatchNormalization
+    - layer: Dropout
+      rate: 0.30
+    - layer: Dense
+      units: 256
+      activation: relu
+      kernel_initializer: he_normal
+      kernel_regularizer:
+        type: L2
+        value: 0.0001
+    - layer: Dropout
+      rate: 0.30
+    - layer: Dense
+      units: 8
+      activation: softmax
+      dtype: float32
+  training:
+    status: pending_execution
+    phase_1:
+      backbone: frozen
+      freeze_includes_backbone_batchnorm: true
+      optimizer:
+        name: Adam
+        learning_rate: 0.001
+      max_epochs: 15
+    phase_2:
+      backbone: partially_unfrozen
+      unfreeze_last_layers: "ceil(0.30 * L)"
+      exclude_backbone_batchnorm: true
+      optimizer:
+        name: Adam
+        learning_rate: 0.00001
+      max_epochs: 35
+
+m4:
+  name: CNN_from_scratch
+  pretrained: false
+  input_shape: [380, 380, 3]
+  num_classes: 8
+  blocks:
+    - filters: 32
+      kernel_size: [3, 3]
+      strides: 1
+      padding: same
+      use_bias: false
+      kernel_initializer: he_normal
+      batch_normalization: true
+      activation: relu
+      pooling:
+        type: MaxPooling2D
+        pool_size: [2, 2]
+        strides: 2
+        padding: same
+      dropout: 0.10
+    - filters: 64
+      kernel_size: [3, 3]
+      strides: 1
+      padding: same
+      use_bias: false
+      kernel_initializer: he_normal
+      batch_normalization: true
+      activation: relu
+      pooling:
+        type: MaxPooling2D
+        pool_size: [2, 2]
+        strides: 2
+        padding: same
+      dropout: 0.15
+    - filters: 128
+      kernel_size: [3, 3]
+      strides: 1
+      padding: same
+      use_bias: false
+      kernel_initializer: he_normal
+      batch_normalization: true
+      activation: relu
+      pooling:
+        type: MaxPooling2D
+        pool_size: [2, 2]
+        strides: 2
+        padding: same
+      dropout: 0.20
+    - filters: 256
+      kernel_size: [3, 3]
+      strides: 1
+      padding: same
+      use_bias: false
+      kernel_initializer: he_normal
+      batch_normalization: true
+      activation: relu
+      pooling:
+        type: MaxPooling2D
+        pool_size: [2, 2]
+        strides: 2
+        padding: same
+      dropout: 0.25
+  head:
+    - layer: GlobalAveragePooling2D
+    - layer: Dense
+      units: 256
+      activation: relu
+      kernel_initializer: he_normal
+      kernel_regularizer:
+        type: L2
+        value: 0.0001
+    - layer: Dropout
+      rate: 0.30
+    - layer: Dense
+      units: 8
+      activation: softmax
+      dtype: float32
+  training:
+    status: pending_execution
+    optimizer:
+      name: Adam
+      learning_rate: 0.001
+    max_epochs: 50
+
+evaluation:
+  status: pending_execution
+  metrics:
+    - accuracy_global
+    - precision_per_class
+    - recall_per_class
+    - f1_per_class
+    - precision_macro
+    - recall_macro
+    - f1_macro
+    - auc_macro_ovr
+    - confusion_matrix
+  mof:
+    status: pending_execution
+    formula: "MOF = w1*accuracy_global + w2*recall_macro + w3*auc_macro"
+    sensitivity_scenarios:
+      C0: { w1: 0.3333, w2: 0.3333, w3: 0.3334 }
+      C1: { w1: 0.60, w2: 0.20, w3: 0.20 }
+      C2: { w1: 0.20, w2: 0.60, w3: 0.20 }
+      C3: { w1: 0.20, w2: 0.20, w3: 0.60 }
+  ahp:
+    status: pending_elicitation
+    criteria_order:
+      - accuracy_global
+      - recall_macro
+      - auc_macro
+    pairwise_matrix: null
+    weights: null
+    consistency:
+      method: Saaty
+      n: 3
+      random_index: 0.58
+      acceptance_rule: "CR <= 0.10"
+    requirement: "Complete, document, and validate AHP before the main runs and before test-set consultation."

@@ -1,0 +1,37 @@
+# Entorno virtual
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Datos e imágenes
+data/
+datasets/
+*.jpg
+*.jpeg
+*.png
+*.bmp
+
+# Modelos, checkpoints y artefactos pesados
+/models/
+checkpoints/
+*.h5
+*.keras
+*.ckpt
+*.weights.h5
+
+# Logs y salidas transitorias
+logs/
+tensorboard/
+outputs/
+runs/
+
+# Sistema operativo y editor
+.DS_Store
+Thumbs.db
+.vscode/

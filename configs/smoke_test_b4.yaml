@@ -1,0 +1,15 @@
+seed: 42
+framework: tensorflow
+model: EfficientNetB4
+weights: imagenet
+input_shape: [380, 380, 3]
+num_classes: 8
+batch_size: 2
+head:
+  pooling: global_average_pooling_2d
+  dropout: 0.30
+  classifier_activation: softmax
+loss: categorical_crossentropy
+optimizer:
+  name: Adam
+  learning_rate: 0.0001
