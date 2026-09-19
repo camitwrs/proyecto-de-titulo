@@ -12,10 +12,6 @@ __pycache__/
 # Datos e imágenes
 data/
 datasets/
-*.jpg
-*.jpeg
-*.png
-*.bmp
 
 # Modelos, checkpoints y artefactos pesados
 /models/
@@ -35,3 +31,9 @@ runs/
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Metadatos de seguridad creados por Windows al copiar archivos hacia WSL
+*:Zone.Identifier
+
+# Documentos locales
+docs/
