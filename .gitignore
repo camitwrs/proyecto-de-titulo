@@ -10,22 +10,22 @@ __pycache__/
 .ipynb_checkpoints/
 
 # Datos e imágenes
-data/
-datasets/
+/data/
+/datasets/
 
 # Modelos, checkpoints y artefactos pesados
 /models/
-checkpoints/
+/checkpoints/
 *.h5
 *.keras
 *.ckpt
 *.weights.h5
 
 # Logs y salidas transitorias
-logs/
-tensorboard/
-outputs/
-runs/
+/logs/
+/tensorboard/
+/outputs/
+/runs/
 
 # Sistema operativo y editor
 .DS_Store
