@@ -277,16 +277,51 @@ evaluation:
       C2: { w1: 0.20, w2: 0.60, w3: 0.20 }
       C3: { w1: 0.20, w2: 0.20, w3: 0.60 }
   ahp:
-    status: pending_elicitation
+    status: elicited_pending_review
     criteria_order:
       - accuracy_global
       - recall_macro
       - auc_macro
-    pairwise_matrix: null
-    weights: null
+    elicited_by: "equipo autor (Jan Houter Hube, Camila Torres Vega), sin dermatólogo externo"
+    elicited_date: "2026-09-26"
+    pairwise_matrix:
+      # a_ij: importancia del criterio i sobre el criterio j (escala de Saaty 1-9)
+      accuracy_global: { accuracy_global: 1,       recall_macro: 0.2,     auc_macro: 0.3333 }
+      recall_macro:    { accuracy_global: 5,       recall_macro: 1,       auc_macro: 3 }
+      auc_macro:       { accuracy_global: 3,       recall_macro: 0.3333,  auc_macro: 1 }
+    justification:
+      recall_vs_accuracy: 5
+      recall_vs_accuracy_reason: >
+        Importancia fuerte. Garbe et al. (2026, Nature Communications, Registro Alemán
+        Central de Melanoma Maligno, 9063 pacientes / 28 años): supervivencia específica
+        por melanoma a 10 años de 85.0% con diagnóstico correcto vs. 62.1% con falso
+        negativo, 8.2 años de vida perdidos en promedio por diagnóstico perdido.
+        Krohling et al. (2021): en screening de cáncer de piel, recall se prioriza antes
+        que accuracy y precision porque el falso negativo es el peor escenario clínico.
+      auc_vs_accuracy: 3
+      auc_vs_accuracy_reason: >
+        Importancia moderada. AUC macro captura discriminación independiente del umbral,
+        relevante para clases minoritarias, sin evidencia cuantitativa de daño tan directa
+        como la de recall.
+      recall_vs_auc: 3
+      recall_vs_auc_reason: >
+        Importancia moderada. Recall se liga directamente al daño clínico medido
+        (años de vida perdidos por falso negativo); AUC es una medida más abstracta
+        de capacidad de ranking.
+    weights: { w1_accuracy_global: 0.1047, w2_recall_macro: 0.6370, w3_auc_macro: 0.2583 }
     consistency:
       method: Saaty
       n: 3
+      lambda_max: 3.0385
+      ci: 0.0193
       random_index: 0.58
+      cr: 0.0332
       acceptance_rule: "CR <= 0.10"
-    requirement: "Complete, document, and validate AHP before the main runs and before test-set consultation."
+      result: accepted
+    limitation: >
+      Elicitación realizada por el propio equipo autor, sin participación de un
+      dermatólogo u otro experto clínico externo. Fundamentada en evidencia
+      bibliográfica cuantitativa (Garbe et al. 2026; Krohling et al. 2021), no en
+      elicitación de un panel de expertos. Declarada como limitación metodológica
+      explícita; sujeta a revisión en el marco de la supervisión del proyecto de título.
+    requirement: "Revisar y validar bajo supervisión antes de las corridas principales y de consultar el conjunto de prueba."
