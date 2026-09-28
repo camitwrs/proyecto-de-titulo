@@ -1,0 +1,34 @@
+{
+  "criteria_order": [
+    "accuracy_global",
+    "recall_macro",
+    "auc_macro"
+  ],
+  "pairwise_matrix": [
+    [
+      1.0,
+      0.2,
+      0.3333
+    ],
+    [
+      5.0,
+      1.0,
+      3.0
+    ],
+    [
+      3.0,
+      0.3333,
+      1.0
+    ]
+  ],
+  "lambda_max": 3.0384562856497945,
+  "ci": 0.019228142824897265,
+  "ri": 0.58,
+  "cr": 0.03315197038775391,
+  "accepted": true,
+  "weights": {
+    "accuracy_global": 0.10472786937541984,
+    "recall_macro": 0.6369918794158846,
+    "auc_macro": 0.2582802512086956
+  }
+}

@@ -318,6 +318,8 @@ evaluation:
       cr: 0.0332
       acceptance_rule: "CR <= 0.10"
       result: accepted
+      script: scripts/compute_ahp.py
+      report: reports/ahp_report.json
     limitation: >
       Elicitación realizada por el propio equipo autor, sin participación de un
       dermatólogo u otro experto clínico externo. Fundamentada en evidencia
