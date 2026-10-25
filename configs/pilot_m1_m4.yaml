@@ -276,6 +276,19 @@ evaluation:
       C1: { w1: 0.60, w2: 0.20, w3: 0.20 }
       C2: { w1: 0.20, w2: 0.60, w3: 0.20 }
       C3: { w1: 0.20, w2: 0.20, w3: 0.60 }
+    ablation:
+      status: pending_execution
+      question: "la conclusion M1 vs M4 depende de alguna metrica en particular?"
+      rule: "se quita una metrica a la vez y su peso se reparte proporcionalmente entre las restantes: w_j' = w_j / suma de los pesos que quedan"
+      applied_to: ahp_principal_vector
+      uses_test: false
+      retrains_models: false
+      reading: "se compara el signo y el orden de la diferencia MOF(M1) - MOF(M4) por semilla en cada variante"
+      reference_weights_source: reports/ahp_report.json
+      variants:
+        sin_accuracy_global: { w1: 0.0000, w2: 0.7115, w3: 0.2885 }
+        sin_recall_macro:    { w1: 0.2885, w2: 0.0000, w3: 0.7115 }
+        sin_auc_macro:       { w1: 0.1412, w2: 0.8588, w3: 0.0000 }
   ahp:
     status: elicited_pending_review
     criteria_order:
@@ -298,16 +311,25 @@ evaluation:
         negativo, 8.2 años de vida perdidos en promedio por diagnóstico perdido.
         Krohling et al. (2021): en screening de cáncer de piel, recall se prioriza antes
         que accuracy y precision porque el falso negativo es el peor escenario clínico.
+        Kurtansky et al. (2025, NPJ Digital Medicine): sistema real de triage de
+        lesiones cutáneas sospechosas de cáncer, con métrica principal fijada en torno
+        a un umbral mínimo de sensibilidad (80-90%); los autores señalan que los
+        sistemas de apoyo diagnóstico oncológico deben minimizar los falsos negativos.
       auc_vs_accuracy: 3
       auc_vs_accuracy_reason: >
         Importancia moderada. AUC macro captura discriminación independiente del umbral,
         relevante para clases minoritarias, sin evidencia cuantitativa de daño tan directa
-        como la de recall.
+        como la de recall. Consistente con el diseño de evaluacion oficial de ISIC 2019
+        (International Skin Imaging Collaboration, 2019): la accuracy balanceada
+        (= recall promedio) es la metrica principal de ranking del desafio y el AUC
+        es el criterio de desempate; la accuracy global sin balancear no se usa como
+        criterio de clasificacion.
       recall_vs_auc: 3
       recall_vs_auc_reason: >
         Importancia moderada. Recall se liga directamente al daño clínico medido
         (años de vida perdidos por falso negativo); AUC es una medida más abstracta
-        de capacidad de ranking.
+        de capacidad de ranking. Tambien consistente con ISIC 2019: recall promedio
+        es la metrica principal, AUC queda en un rol secundario de desempate.
     weights: { w1_accuracy_global: 0.1047, w2_recall_macro: 0.6370, w3_auc_macro: 0.2583 }
     consistency:
       method: Saaty
@@ -323,7 +345,17 @@ evaluation:
     limitation: >
       Elicitación realizada por el propio equipo autor, sin participación de un
       dermatólogo u otro experto clínico externo. Fundamentada en evidencia
-      bibliográfica cuantitativa (Garbe et al. 2026; Krohling et al. 2021), no en
-      elicitación de un panel de expertos. Declarada como limitación metodológica
-      explícita; sujeta a revisión en el marco de la supervisión del proyecto de título.
-    requirement: "Revisar y validar bajo supervisión antes de las corridas principales y de consultar el conjunto de prueba."
+      bibliográfica cuantitativa (Garbe et al. 2026; Krohling et al. 2021; Kurtansky
+      et al. 2025), no en elicitación de un panel de expertos. Declarada como
+      limitación metodológica explícita; sujeta a revisión en el marco de la
+      supervisión del proyecto de título. El comité de supervisión tiene perfil de
+      ingeniería, no clínico: esta limitación no se resuelve con su revisión, se
+      mitiga con el análisis de sensibilidad C0-C3.
+    requirement: >
+      Revisión metodológica (no clínica) bajo la supervisión del proyecto de título:
+      verificar que el procedimiento AHP esté bien aplicado (escala de Saaty,
+      CR<=0.10) y que la evidencia citada (Garbe et al. 2026; Krohling et al. 2021;
+      Kurtansky et al. 2025) respalde razonablemente los juicios. No se dispone de
+      validación clínica experta; esa limitación se mitiga con el análisis de
+      sensibilidad C0-C3, no con esta revisión. Completar antes de las corridas
+      principales y de consultar prueba.

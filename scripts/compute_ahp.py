@@ -62,6 +62,20 @@ def consistency(lam_max, n):
     return ci, ri, cr
 
 
+def ablation_weights(w, order):
+    """Vectores de pesos para el ablation de la MOF: se quita una metrica a la
+    vez y su peso se reparte de forma proporcional entre las restantes,
+    w'_j = w_j / suma de los pesos que quedan, para que la MOF siga sumando 1."""
+    variants = {}
+    for k, removed in enumerate(order):
+        remaining = sum(w[j] for j in range(len(order)) if j != k)
+        variants[f"sin_{removed}"] = {
+            crit: (0.0 if j == k else float(w[j] / remaining))
+            for j, crit in enumerate(order)
+        }
+    return variants
+
+
 def main():
     config = load_config(CONFIG_PATH)
     ahp_cfg = config["evaluation"]["ahp"]
@@ -92,6 +106,12 @@ def main():
         print()
         print(f"Diferencia maxima vs. pesos ya registrados en el YAML: {max_diff:.6f}")
 
+    ablation = ablation_weights(w, order)
+    print()
+    print("Pesos para el ablation (quitar una metrica a la vez):")
+    for name, vec in ablation.items():
+        print(f"  {name}: " + ", ".join(f"{c}={v:.4f}" for c, v in vec.items()))
+
     report = {
         "criteria_order": order,
         "pairwise_matrix": A.tolist(),
@@ -101,6 +121,7 @@ def main():
         "cr": cr,
         "accepted": accepted,
         "weights": {c: float(wi) for c, wi in zip(order, w)},
+        "ablation_weights": ablation,
     }
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(REPORT_PATH, "w", encoding="utf-8") as f:

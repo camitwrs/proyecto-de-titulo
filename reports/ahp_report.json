@@ -30,5 +30,22 @@
     "accuracy_global": 0.10472786937541984,
     "recall_macro": 0.6369918794158846,
     "auc_macro": 0.2582802512086956
+  },
+  "ablation_weights": {
+    "sin_accuracy_global": {
+      "accuracy_global": 0.0,
+      "recall_macro": 0.7115064320962295,
+      "auc_macro": 0.28849356790377045
+    },
+    "sin_recall_macro": {
+      "accuracy_global": 0.2885000732405173,
+      "recall_macro": 0.0,
+      "auc_macro": 0.7114999267594827
+    },
+    "sin_auc_macro": {
+      "accuracy_global": 0.14119601041509655,
+      "recall_macro": 0.8588039895849033,
+      "auc_macro": 0.0
+    }
   }
 }
