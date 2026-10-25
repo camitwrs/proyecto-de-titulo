@@ -61,6 +61,27 @@ def build_efficientnet_b4_m1(config):
     return model, backbone
 
 
+def aplicar_descongelado_fase2(backbone, prefixes):
+    """Descongela para la Fase 2 las capas del backbone cuyo nombre empieza con
+    alguno de 'prefixes' (por ejemplo ["block7", "top_"]), salvo las
+    BatchNormalization, que se mantienen congeladas.
+
+    Congelar de nuevo todo el backbone y luego habilitar solo las capas elegidas
+    evita depender del estado que dejo la Fase 1. Hay que volver a compilar el
+    modelo despues de llamar a esta funcion para que el cambio tenga efecto.
+    Retorna la cantidad de capas descongeladas.
+    """
+    backbone.trainable = True
+    n_unfrozen = 0
+    for layer in backbone.layers:
+        selected = layer.name.startswith(tuple(prefixes)) and not isinstance(
+            layer, tf.keras.layers.BatchNormalization
+        )
+        layer.trainable = selected
+        n_unfrozen += int(selected and bool(layer.weights))
+    return n_unfrozen
+
+
 def build_efficientnet_b4(config):
     input_shape = tuple(config["input_shape"])
     num_classes = config["num_classes"]

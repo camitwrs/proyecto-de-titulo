@@ -112,8 +112,8 @@ checkpoint_selection:
   evaluate_from: persisted_checkpoint_file
   test_set_used_for_selection: false
   m1:
-    save_best_checkpoint_per_phase: true
-    final_selection: minimum_val_loss_across_phase_1_and_phase_2
+    save_best_checkpoint_per_fase: true
+    final_selection: minimum_val_loss_across_fase_1_and_fase_2
   m4:
     save_best_checkpoint: true
 
@@ -156,21 +156,43 @@ m1:
       dtype: float32
   training:
     status: pending_execution
-    phase_1:
+    fase_1:
       backbone: frozen
       freeze_includes_backbone_batchnorm: true
       optimizer:
         name: Adam
         learning_rate: 0.001
       max_epochs: 15
-    phase_2:
+    fase_2:
       backbone: partially_unfrozen
-      unfreeze_last_layers: "ceil(0.30 * L)"
       exclude_backbone_batchnorm: true
       optimizer:
         name: Adam
         learning_rate: 0.00001
       max_epochs: 35
+      # La profundidad de descongelado se elige empiricamente entre tres candidatos
+      # declarados antes de correr (ver seleccion_descongelado). Los candidatos se alinean
+      # a bloques; "ceil(0.30 * L)" cortaba a mitad del bloque 6a y equivalia al 77 %
+      # de los parametros del backbone.
+      candidates:
+        block7_top:
+          prefixes: ["block7", "top_"]
+          backbone_trainable_params: 5253748
+        block6_top:
+          prefixes: ["block6", "block7", "top_"]
+          backbone_trainable_params: 13836088
+        block5_top:
+          prefixes: ["block5", "block6", "block7", "top_"]
+          backbone_trainable_params: 16119004
+      seleccion_descongelado:
+        status: pending_execution
+        selection_seed: 7
+        uses_test: false
+        start_from: fase_1_best_checkpoint_of_selection_seed
+        criterion: minimum_val_loss
+        tie_tolerance: 0.0001
+        tie_break: fewer_trainable_params
+        script: scripts/seleccionar_descongelado.py
 
 m4:
   name: CNN_from_scratch

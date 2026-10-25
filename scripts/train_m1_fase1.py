@@ -84,7 +84,7 @@ def compute_class_weights(df_train, class_order):
     return {int(idx): float(n_total / (n_classes * n_c)) for idx, n_c in counts.items()}
 
 
-def build_callbacks(config, run_dir):
+def build_callbacks(config, run_dir, checkpoint_name="fase1_mejor.weights.h5"):
     cb_cfg = config["common"]["callbacks"]
     return [
         tf.keras.callbacks.EarlyStopping(
@@ -102,7 +102,7 @@ def build_callbacks(config, run_dir):
             min_lr=cb_cfg["reduce_lr_on_plateau"]["min_lr"],
         ),
         tf.keras.callbacks.ModelCheckpoint(
-            filepath=str(run_dir / "fase1_mejor.weights.h5"),
+            filepath=str(run_dir / checkpoint_name),
             monitor="val_loss",
             mode="min",
             save_best_only=True,
@@ -122,8 +122,8 @@ def main():
     config = load_config(CONFIG_PATH)
 
     seed = args.seed if args.seed is not None else config["seed"]
-    phase_cfg = config["m1"]["training"]["phase_1"]
-    max_epochs = args.epochs if args.epochs is not None else phase_cfg["max_epochs"]
+    fase_cfg = config["m1"]["training"]["fase_1"]
+    max_epochs = args.epochs if args.epochs is not None else fase_cfg["max_epochs"]
     class_order = config["dataset"]["classes"]["order"]
     batch_size = config["common"]["batch_size"]
     image_size = config["m1"]["input_shape"][0]
@@ -135,7 +135,7 @@ def main():
     gpus = [d.name for d in tf.config.list_physical_devices("GPU")]
     run_info = {
         "status": "running",
-        "phase": 1,
+        "fase": 1,
         "seed": seed,
         "max_epochs": max_epochs,
         "started_at": datetime.now().isoformat(timespec="seconds"),
@@ -192,7 +192,7 @@ def main():
         opt_cfg = config["common"]["optimizer_defaults"]
         model.compile(
             optimizer=tf.keras.optimizers.Adam(
-                learning_rate=phase_cfg["optimizer"]["learning_rate"],
+                learning_rate=fase_cfg["optimizer"]["learning_rate"],
                 beta_1=opt_cfg["beta_1"], beta_2=opt_cfg["beta_2"], epsilon=opt_cfg["epsilon"],
             ),
             loss=tf.keras.losses.CategoricalCrossentropy(
