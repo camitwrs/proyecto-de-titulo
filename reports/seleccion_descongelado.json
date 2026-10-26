@@ -1,0 +1,34 @@
+{
+  "selection_seed": 7,
+  "criterion": "minimum_val_loss",
+  "tie_tolerance": 0.0001,
+  "tie_break": "fewer_trainable_params",
+  "uses_test": false,
+  "candidates": {
+    "block7_top": {
+      "run": "block7_top_seed7_20261025_185830",
+      "best_val_loss": 1.3026690483093262,
+      "best_epoch": 17,
+      "params_trainable": 5718396,
+      "commit": "c8fae5d"
+    },
+    "block6_top": {
+      "run": "block6_top_seed7_20261025_185834",
+      "best_val_loss": 1.2274614572525024,
+      "best_epoch": 17,
+      "params_trainable": 14300736,
+      "commit": "c8fae5d"
+    },
+    "block5_top": {
+      "run": "block5_top_seed7_20261025_200653",
+      "best_val_loss": 1.1985902786254883,
+      "best_epoch": 21,
+      "params_trainable": 16583652,
+      "commit": "c8fae5d"
+    }
+  },
+  "within_tolerance": [
+    "block5_top"
+  ],
+  "selected": "block5_top"
+}
