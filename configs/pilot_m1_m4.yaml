@@ -313,7 +313,7 @@ m4:
       activation: softmax
       dtype: float32
   training:
-    status: pending_execution
+    status: frozen_before_final_runs
     optimizer:
       name: Adam
       learning_rate: 0.001
@@ -336,6 +336,12 @@ m4:
       de: 50
       a: 100
       resultado_piloto_previo: {epocas: 50, best_epoch: 40, best_val_loss: 1.5974, val_accuracy_ultima: 0.438}
+      uses_test: false
+      resultado_piloto_100: {epocas: 21, best_epoch: 9, best_val_loss: 1.6115, parada: paciencia}
+      hallazgos:
+        - "Misma semilla (7) y misma configuracion dieron best_epoch 40 (val_loss 1.5974) y best_epoch 9 (1.6115): la semilla no da reproducibilidad exacta en GPU."
+        - "Con lr 1e-3 y lote 8 la val_loss oscila entre 1.6 y 2.2 de una epoca a otra; el checkpoint elegido puede ser un pico (sesgo de seleccion sobre validacion, no sobre test; sesgo en contra de M4)."
+      decision: congelar M4 con max_epochs 100, paciencia 6 (tasa) y 12 (parada); sin mas ajustes
       uses_test: false
     ajuste_callbacks:
       decidido_tras_ver: piloto_m4_semilla7_paciencia_comun
