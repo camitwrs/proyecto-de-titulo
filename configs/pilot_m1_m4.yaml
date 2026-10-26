@@ -317,7 +317,7 @@ m4:
     optimizer:
       name: Adam
       learning_rate: 0.001
-    max_epochs: 50
+    max_epochs: 100
     # Ajuste declarado DESPUES de ver el piloto de M4 (semilla 7, solo train/validation): con la paciencia
     # comun (3 y 7) el lr cayo de 1e-3 a 1.6e-6 en 16 epocas y el modelo quedo subajustado
     # (val_accuracy 0.37, best_val_loss 1.7875). Pisa solo la paciencia de los dos callbacks; el resto sigue
@@ -327,6 +327,16 @@ m4:
         patience: 6
       early_stopping:
         patience: 12
+    ajuste_max_epochs:
+      # Segundo ajuste, tras el piloto con paciencia 6 y 12: llego a la epoca 50 (techo) sin parar por paciencia,
+      # con best_epoch 40, val_loss 1.5974 y la curva aun descendiendo lento. El techo de 50 se habia fijado por
+      # paridad de presupuesto con M1 (15 + 35), pero M1 paro por paciencia dentro de su techo y M4 no. Se sube el
+      # techo a 100 para que decida la parada por validacion. Es el ULTIMO ajuste de M4: tras el piloto con 100
+      # epocas la configuracion se congela sea cual sea el resultado. 100 es un techo, no un valor afinado.
+      de: 50
+      a: 100
+      resultado_piloto_previo: {epocas: 50, best_epoch: 40, best_val_loss: 1.5974, val_accuracy_ultima: 0.438}
+      uses_test: false
     ajuste_callbacks:
       decidido_tras_ver: piloto_m4_semilla7_paciencia_comun
       resultado_piloto_previo: {epocas: 16, best_epoch: 9, best_val_loss: 1.7875, val_accuracy_final: 0.376}
