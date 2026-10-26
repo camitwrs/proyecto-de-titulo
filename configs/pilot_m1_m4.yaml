@@ -318,6 +318,19 @@ m4:
       name: Adam
       learning_rate: 0.001
     max_epochs: 50
+    # Ajuste declarado DESPUES de ver el piloto de M4 (semilla 7, solo train/validation): con la paciencia
+    # comun (3 y 7) el lr cayo de 1e-3 a 1.6e-6 en 16 epocas y el modelo quedo subajustado
+    # (val_accuracy 0.37, best_val_loss 1.7875). Pisa solo la paciencia de los dos callbacks; el resto sigue
+    # el protocolo comun. Los valores 6 y 12 no se afinaron: son un unico intento, limitacion declarada.
+    callbacks:
+      reduce_lr_on_plateau:
+        patience: 6
+      early_stopping:
+        patience: 12
+    ajuste_callbacks:
+      decidido_tras_ver: piloto_m4_semilla7_paciencia_comun
+      resultado_piloto_previo: {epocas: 16, best_epoch: 9, best_val_loss: 1.7875, val_accuracy_final: 0.376}
+      uses_test: false
 
 evaluation:
   status: pending_execution

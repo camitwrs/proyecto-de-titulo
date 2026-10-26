@@ -84,8 +84,11 @@ def compute_class_weights(df_train, class_order):
     return {int(idx): float(n_total / (n_classes * n_c)) for idx, n_c in counts.items()}
 
 
-def build_callbacks(config, run_dir, checkpoint_name="fase1_mejor.weights.h5"):
-    cb_cfg = config["common"]["callbacks"]
+def build_callbacks(config, run_dir, checkpoint_name="fase1_mejor.weights.h5", overrides=None):
+    """Callbacks comunes del YAML; `overrides` pisa claves de un callback (p. ej. la paciencia de M4)."""
+    cb_cfg = {name: dict(values) for name, values in config["common"]["callbacks"].items()}
+    for name, values in (overrides or {}).items():
+        cb_cfg[name].update(values)
     return [
         tf.keras.callbacks.EarlyStopping(
             monitor=cb_cfg["early_stopping"]["monitor"],

@@ -1,8 +1,8 @@
 #!/bin/bash
-# Piloto tecnico de M1, Fase 1 (backbone congelado), solo train y validation.
+# Entrenamiento de M4 (CNN desde cero), solo train y validation.
 # Uso, desde ~/proyecto_de_titulo en el nodo de login:
 #   mkdir -p logs && sbatch jobs/train_m4.sbatch
-# Otra semilla o ruta de datos:
+# Otra semilla, ruta de datos o carpeta de salida (OUTPUT_ROOT, p. ej. runs/final/m4):
 #   sbatch --export=ALL,SEED=123,DATA_ROOT=/work/usuario/isic jobs/train_m4.sbatch
 #SBATCH -J m4
 #SBATCH -p GPU
@@ -40,4 +40,7 @@ echo "fecha: $(date -Is)"
 echo "semilla: $SEED | datos: $DATA_ROOT"
 nvidia-smi
 
-python -u scripts/train_m4.py --seed "$SEED" --data-root "$DATA_ROOT"
+OUT_ARGS=()
+[ -n "${OUTPUT_ROOT:-}" ] && OUT_ARGS=(--output-root "$OUTPUT_ROOT")
+
+python -u scripts/train_m4.py --seed "$SEED" --data-root "$DATA_ROOT" "${OUT_ARGS[@]}"

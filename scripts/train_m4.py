@@ -151,7 +151,8 @@ def main():
         history = model.fit(
             ds_train, validation_data=ds_val, epochs=max_epochs,
             class_weight=class_weights,
-            callbacks=build_callbacks(config, run_dir, checkpoint_name="m4_mejor.weights.h5"),
+            callbacks=build_callbacks(config, run_dir, checkpoint_name="m4_mejor.weights.h5",
+                                      overrides=config["m4"]["training"].get("callbacks")),
             verbose=2,
         )
 
