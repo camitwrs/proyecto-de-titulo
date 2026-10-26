@@ -184,6 +184,14 @@ m1:
         block5_top:
           prefixes: ["block5", "block6", "block7", "top_"]
           backbone_trainable_params: 16119004
+        # Ronda 2: declarada antes de ejecutar y despues de conocer la ronda 1, en la que
+        # block5_top (el mas profundo) obtuvo el menor val_loss.
+        block4_top:
+          prefixes: ["block4", "block5", "block6", "block7", "top_"]
+          backbone_trainable_params: 17162774
+        block3_top:
+          prefixes: ["block3", "block4", "block5", "block6", "block7", "top_"]
+          backbone_trainable_params: 17355112
       seleccion_descongelado:
         status: executed
         selection_seed: 7
@@ -194,7 +202,20 @@ m1:
         tie_break: fewer_trainable_params
         script: scripts/seleccionar_descongelado.py
         report: reports/seleccion_descongelado.json
-        result:
+        rondas:
+          ronda_1:
+            status: executed
+            candidates: [block7_top, block6_top, block5_top]
+            declared: antes_de_ejecutar
+          ronda_2:
+            status: pending_execution
+            candidates: [block4_top, block3_top]
+            declared: antes_de_ejecutar_y_despues_de_conocer_la_ronda_1
+            reason: "en la ronda 1 gano el candidato mas profundo, es decir, el optimo quedo en el borde del rango; Tajbakhsh et al. (2016) proponen incluir mas capas hasta que el desempeno deje de mejorar"
+            final_round: true
+            final_round_reason: "block3_top es el limite practico: los bloques 1 y 2 son los mas generales (Yosinski et al., 2014) y descongelarlos equivale casi a ajustar todo el modelo con solo 17.705 imagenes de entrenamiento"
+            selection: "se elige entre los cinco candidatos de ambas rondas por menor val_loss, con la misma tolerancia y el mismo desempate; si gana block3_top el optimo vuelve a quedar en el borde y se declara como limitacion, sin una tercera ronda"
+        result_ronda_1:
           selected: block5_top
           commit: c8fae5d
           val_loss: { block7_top: 1.3027, block6_top: 1.2275, block5_top: 1.1986 }

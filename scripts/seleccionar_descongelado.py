@@ -6,8 +6,9 @@ del minimo, gana el que tiene menos parametros entrenables.
 Solo lee los run_info.json de las corridas de Fase 2 con la semilla de seleccion.
 No usa el conjunto de test.
 
-Uso:
+Uso (todos los candidatos del YAML, o solo algunos con --candidatos):
     python scripts/seleccionar_descongelado.py --runs-root runs/m1_fase2
+    python scripts/seleccionar_descongelado.py --candidatos block7_top block6_top block5_top
 """
 
 import argparse
@@ -53,13 +54,20 @@ def select(runs, tie_tolerance):
 def main():
     parser = argparse.ArgumentParser(description="Seleccion de profundidad de descongelado (solo validation)")
     parser.add_argument("--runs-root", type=Path, default=PROJECT_ROOT / "runs" / "m1_fase2")
+    parser.add_argument("--candidatos", nargs="+", default=None,
+                        help="candidatos a comparar (por defecto, todos los del YAML)")
     args = parser.parse_args()
 
     with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         fase_cfg = yaml.safe_load(f)["m1"]["training"]["fase_2"]
     rule = fase_cfg["seleccion_descongelado"]
 
-    runs = load_runs(args.runs_root, rule["selection_seed"], list(fase_cfg["candidates"]))
+    candidatos = args.candidatos if args.candidatos else list(fase_cfg["candidates"])
+    desconocidos = [c for c in candidatos if c not in fase_cfg["candidates"]]
+    if desconocidos:
+        raise SystemExit(f"Candidatos que no estan en el YAML: {desconocidos}")
+
+    runs = load_runs(args.runs_root, rule["selection_seed"], candidatos)
     winner, tied = select(runs, rule["tie_tolerance"])
 
     print(f"Semilla de seleccion: {rule['selection_seed']} | tolerancia de empate: {rule['tie_tolerance']}")

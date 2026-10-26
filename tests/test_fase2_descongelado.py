@@ -18,6 +18,8 @@ EXPECTED_BACKBONE_PARAMS = {
     "block7_top": 5253748,
     "block6_top": 13836088,
     "block5_top": 16119004,
+    "block4_top": 17162774,
+    "block3_top": 17355112,
 }
 
 
@@ -62,6 +64,8 @@ class TestDescongeladoFase2(unittest.TestCase):
             counts[name] = sum(int(tf.size(w).numpy()) for w in backbone.trainable_weights)
         self.assertLess(counts["block7_top"], counts["block6_top"])
         self.assertLess(counts["block6_top"], counts["block5_top"])
+        self.assertLess(counts["block5_top"], counts["block4_top"])
+        self.assertLess(counts["block4_top"], counts["block3_top"])
 
 
 if __name__ == "__main__":
