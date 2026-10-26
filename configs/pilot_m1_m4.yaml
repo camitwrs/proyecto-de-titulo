@@ -321,6 +321,12 @@ evaluation:
   mof:
     status: pending_execution
     formula: "MOF = w1*accuracy_global + w2*recall_macro + w3*auc_macro"
+    analysis_rules:
+      status: frozen_before_test
+      tie_tolerance: 0.0001
+      tie_tolerance_reason: "precision de reporte: la MOF se presenta con cuatro decimales, por lo que dos valores que difieren en menos de 1e-4 son indistinguibles para quien lee. No es un criterio de significancia estadistica ni mide el ruido entre semillas; ese analisis es el descriptivo por semilla y el Wilcoxon complementario. Se fijo antes de consultar test"
+      perturbation_relative_delta: 0.10
+      weight_sum_tolerance: 0.000000001
     sensitivity_scenarios:
       C0: { w1: 0.3333, w2: 0.3333, w3: 0.3334 }
       C1: { w1: 0.60, w2: 0.20, w3: 0.20 }
@@ -339,6 +345,22 @@ evaluation:
         sin_accuracy_global: { w1: 0.0000, w2: 0.7115, w3: 0.2885 }
         sin_recall_macro:    { w1: 0.2885, w2: 0.0000, w3: 0.7115 }
         sin_auc_macro:       { w1: 0.1412, w2: 0.8588, w3: 0.0000 }
+  gradcam:
+    status: frozen_before_test
+    method: "Selvaraju et al. 2017; puntaje de la clase antes del softmax; ReLU de la suma ponderada por el gradiente promedio"
+    target_layer: { m1: "backbone anidado (salida top_activation)", m4: "ultima activacion ReLU (activation_3, antes del ultimo MaxPooling)" }
+    normalization: "cada mapa se divide por su maximo para visualizar en [0, 1]; un mapa nulo queda en 0"
+    visualized_seed: 42
+    selection:
+      seed: 42
+      aciertos_por_clase: 2
+      celdas_de_confusion: 3
+      imagenes_por_celda: 2
+      falsos_negativos_de: [MEL, BCC, SCC]
+      falsos_negativos_por_clase: 3
+      rule: "aciertos por clase; las tres celdas de confusion con mas imagenes; falsos negativos de MEL, BCC y SCC; dentro de cada grupo, muestreo al azar con la semilla indicada, sin mirar las imagenes"
+    explained_class: "la predicha; en errores, tambien la verdadera"
+    registered: [criterio, imagenes, modelo, checkpoint, capa]
   ahp:
     status: elicited_pending_review
     criteria_order:
