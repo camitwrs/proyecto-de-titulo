@@ -208,13 +208,26 @@ m1:
             candidates: [block7_top, block6_top, block5_top]
             declared: antes_de_ejecutar
           ronda_2:
-            status: pending_execution
+            status: executed
             candidates: [block4_top, block3_top]
             declared: antes_de_ejecutar_y_despues_de_conocer_la_ronda_1
             reason: "en la ronda 1 gano el candidato mas profundo, es decir, el optimo quedo en el borde del rango; Tajbakhsh et al. (2016) proponen incluir mas capas hasta que el desempeno deje de mejorar"
             final_round: true
             final_round_reason: "block3_top es el limite practico: los bloques 1 y 2 son los mas generales (Yosinski et al., 2014) y descongelarlos equivale casi a ajustar todo el modelo con solo 17.705 imagenes de entrenamiento"
             selection: "se elige entre los cinco candidatos de ambas rondas por menor val_loss, con la misma tolerancia y el mismo desempate; si gana block3_top el optimo vuelve a quedar en el borde y se declara como limitacion, sin una tercera ronda"
+        result_final:
+          selected: block3_top
+          commit: 7b11a9f
+          val_loss: { block7_top: 1.3027, block6_top: 1.2275, block5_top: 1.1986, block4_top: 1.1935, block3_top: 1.1926 }
+          best_epoch: { block7_top: 17, block6_top: 17, block5_top: 21, block4_top: 22, block3_top: 19 }
+          within_tolerance: [block3_top]
+          limitation: "block3_top es el candidato mas profundo de ambas rondas, asi que el optimo vuelve a quedar en el borde del rango declarado; no hay tercera ronda. Las mejoras entre candidatos consecutivos se achican (0.0051 entre block5_top y block4_top, 0.0009 entre block4_top y block3_top), con una sola semilla, por lo que los tres candidatos mas profundos no se distinguen con claridad"
+        noise_reporting:
+          status: declared_before_final_runs
+          rule: "las cinco corridas finales de M1 usan block3_top con cinco semillas; se reporta la desviacion estandar del val_loss entre semillas como medida de ruido, para interpretar si las diferencias entre los candidatos mas profundos de la seleccion eran distinguibles. No cambia el candidato elegido"
+        round_3_considered:
+          decision: not_run
+          reason: "la mejora de block4_top a block3_top (0.0009) es menor que la variacion esperable entre semillas; la tolerancia de 1e-4 es precision de reporte y no mide ruido, por lo que no distingue senal de ruido; extender el rango seria ajustar sobre una diferencia que una sola semilla no permite interpretar"
         result_ronda_1:
           selected: block5_top
           commit: c8fae5d

@@ -25,10 +25,24 @@
       "best_epoch": 21,
       "params_trainable": 16583652,
       "commit": "c8fae5d"
+    },
+    "block4_top": {
+      "run": "block4_top_seed7_20261026_013834",
+      "best_val_loss": 1.193472981452942,
+      "best_epoch": 22,
+      "params_trainable": 17627422,
+      "commit": "7b11a9f"
+    },
+    "block3_top": {
+      "run": "block3_top_seed7_20261026_013834",
+      "best_val_loss": 1.1925623416900635,
+      "best_epoch": 19,
+      "params_trainable": 17819760,
+      "commit": "7b11a9f"
     }
   },
   "within_tolerance": [
-    "block5_top"
+    "block3_top"
   ],
-  "selected": "block5_top"
+  "selected": "block3_top"
 }
