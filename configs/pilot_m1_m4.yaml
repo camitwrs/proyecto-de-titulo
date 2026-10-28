@@ -404,7 +404,9 @@ evaluation:
     explained_class: "la predicha; en errores, tambien la verdadera"
     registered: [criterio, imagenes, modelo, checkpoint, capa]
   ahp:
-    status: elicited_pending_review
+    status: frozen_before_test
+    frozen_date: "2026-10-28"
+    frozen_note: "pesos confirmados como definitivos por las autoras antes de leer cualquier metrica de test; los juicios fueron elicitados por el equipo autor, sin dermatologo externo (limitacion declarada)"
     criteria_order:
       - accuracy_global
       - recall_macro
